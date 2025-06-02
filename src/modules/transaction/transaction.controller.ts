@@ -1,6 +1,16 @@
-import { Controller, Post, Body, Get } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Patch,
+  Param,
+  Body,
+  Get,
+  NotFoundException,
+  ParseUUIDPipe
+} from '@nestjs/common'
 import { TransactionService } from './transaction.service'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
+import { UpdateTransactionStatusDto } from './dto/update-transaction-status.dto'
 
 @Controller('transactions')
 export class TransactionController {
@@ -8,16 +18,28 @@ export class TransactionController {
 
   @Post()
   async create(@Body() dto: CreateTransactionDto) {
-    const result = await this.transactionService.create(dto)
-    return {
-        id: 'some-id',
-        status: 'some-status',
-        wompiId: 'some-wompi-id',
-    }
+    return this.transactionService.create(dto)
   }
 
   @Get()
   async findAll() {
     return this.transactionService.findAll()
-  }    // Aquí podrías agregar más endpoints según sea necesario
+  }
+
+  @Patch(':id/status')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() body: Omit<UpdateTransactionStatusDto, 'id'>
+  ) {
+    return this.transactionService.updateStatus({ id, ...body })
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const transaction = await this.transactionService.findOne(id)
+    if (!transaction) {
+      throw new NotFoundException('Transacción no encontrada')
+    }
+    return transaction
+  }
 }

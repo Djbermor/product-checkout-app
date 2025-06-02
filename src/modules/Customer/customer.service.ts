@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { CreateProductDto } from './dto/create-product.dto'
+import { CreateCustomerDto } from './dto/create-customer.dto'
 import { randomUUID } from 'crypto'
 
 @Injectable()
-export class ProductService {
+export class CustomerService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateProductDto) {
-    return this.prisma.product.create({
+  async create(dto: CreateCustomerDto) {
+    return this.prisma.customer.create({
       data: {
         id: randomUUID(),
         ...dto
@@ -17,6 +17,6 @@ export class ProductService {
   }
 
   async findAll() {
-    return this.prisma.product.findMany()
+    return this.prisma.customer.findMany()
   }
 }

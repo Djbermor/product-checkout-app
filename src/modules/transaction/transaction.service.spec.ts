@@ -20,6 +20,7 @@ export class TransactionService {
         status: 'PENDING',
         productId,
         customerId: customerRecord.id,
+        amount: data.amount, // Make sure 'amount' is provided in CreateTransactionDto
       },
     })
 
@@ -42,7 +43,6 @@ export class TransactionService {
       },
     })
 
-    // Si éxito, disminuir stock
     if (paymentSuccess) {
       await this.prisma.product.update({
         where: { id: productId },

@@ -1,45 +1,46 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 model Product {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   name        String
   description String
   price       Float
   stock       Int
-  createdAt   DateTime @default(now())
+  createdAt   DateTime      @default(now())
+  transactions Transaction[]
+}
+
+model Customer {
+  id           String        @id @default(uuid())
+  name         String
+  phone        String
+  email        String
   transactions Transaction[]
 }
 
 model Transaction {
-  id          String   @id @default(uuid())
-  status      String
-  wompiId     String?
-  productId   String
-  product     Product  @relation(fields: [productId], references: [id])
-  customerId  String
-  customer    Customer @relation(fields: [customerId], references: [id])
-  delivery    Delivery?
-  createdAt   DateTime @default(now())
-}
-
-model Customer {
-  id          String   @id @default(uuid())
-  name        String
-  phone       String
-  email       String
-  transactions Transaction[]
+  id         String     @id @default(uuid())
+  status     String
+  wompiId    String?
+  product    Product    @relation(fields: [productId], references: [id])
+  productId  String
+  customer   Customer   @relation(fields: [customerId], references: [id])
+  customerId String
+  delivery   Delivery?
+  createdAt  DateTime   @default(now())
+  amount     Float
 }
 
 model Delivery {
-  id            String   @id @default(uuid())
+  id            String      @id @default(uuid())
   address       String
-  transactionId String   @unique
   transaction   Transaction @relation(fields: [transactionId], references: [id])
+  transactionId String      @unique
 }
