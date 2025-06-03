@@ -8,6 +8,9 @@ import {
   ValidateNested,
   IsNumber,
   IsPositive,
+  IsInt,
+  Min,
+  Max,
 } from 'class-validator'
 import { Type } from 'class-transformer'
 
@@ -60,4 +63,9 @@ export class CreateTransactionDto {
   @IsString()
   @MinLength(3)
   cvv: string
+
+  @IsInt()
+  @Min(1)
+  @Max(36)
+  installments: number
 }

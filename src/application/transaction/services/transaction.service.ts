@@ -3,10 +3,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common'
-import { CreateTransactionDto } from './dto/create-transaction.dto'
-import { UpdateTransactionStatusDto } from './dto/update-transaction-status.dto'
-import { PrismaService } from 'src/prisma/prisma.service'
-import { WompiService } from '../wompi/wompi.service'
+import { CreateTransactionDto } from '@http/transaction/dto/create-transaction.dto';
+import { UpdateTransactionStatusDto } from '@http/transaction/dto/update-transaction-status.dto';
+import { PrismaService } from '@infra/database/prisma/prisma.service';
+import { WompiService } from '@infra/payment/wompi/wompi.service';
+import { Customer } from '@prisma/client';
+import { TokenizeRawCardDto } from '@http/transaction/dto/tokenize-card-dto';
 
 @Injectable()
 export class TransactionService {
@@ -15,32 +17,48 @@ export class TransactionService {
     private readonly wompiService: WompiService
   ) {}
 
+  async tokenizeCard(dto: TokenizeRawCardDto): Promise<string> {
+    return this.wompiService.tokenizeCard({
+      number: dto.number,
+      cvc: dto.cvc,
+      exp_month: dto.exp_month,
+      exp_year: dto.exp_year,
+      card_holder: dto.card_holder,
+    });
+  }
+
   async create(dto: CreateTransactionDto) {
     try {
+      
       const product = await this.prisma.product.findUnique({
         where: { id: dto.productId },
-      })
+      });
 
       if (!product) {
-        throw new NotFoundException('El producto con ese ID no existe')
+        throw new NotFoundException('El producto con ese ID no existe');
       }
 
-      // 1. Crear transacción en estado PENDING
-      const transaction = await this.prisma.transaction.create({
-        data: {
-          status: 'PENDING',
-          wompiId: null,
-          amount: dto.amount,
-          product: {
-            connect: { id: dto.productId },
-          },
-          customer: {
+      const existingCustomer = await this.prisma.customer.findFirst({
+        where: { email: dto.customer.email },
+      });
+
+      const customerData = existingCustomer
+        ? { connect: { id: existingCustomer.id } }
+        : {
             create: {
               name: dto.customer.name,
               phone: dto.customer.phone,
               email: dto.customer.email,
             },
-          },
+          };
+
+      const transaction = await this.prisma.transaction.create({
+        data: {
+          status: 'PENDING',
+          wompiId: null,
+          amount: dto.amount,
+          product: { connect: { id: dto.productId } },
+          customer: customerData,
           delivery: {
             create: {
               address: dto.delivery.address,
@@ -52,47 +70,60 @@ export class TransactionService {
           customer: true,
           delivery: true,
         },
-      })
+      });
 
-      // 2. Consumir API de Wompi
+      const [exp_month, exp_year] = dto.expirationDate.split('/');
+      if (!exp_month || !exp_year) {
+        throw new InternalServerErrorException('Formato de fecha de expiración inválido');
+      }
+
+      const token = await this.wompiService.tokenizeCard({
+        number: dto.cardNumber,
+        cvc: dto.cvv,
+        exp_month,
+        exp_year,
+        card_holder: dto.cardHolder,
+      });
+
       const wompiResponse = await this.wompiService.payCard({
         amount: transaction.amount,
         customerEmail: transaction.customer.email,
-      })
+        token,
+        reference: `checkout-${transaction.id}`,
+        installments: dto.installments,
+      });
 
-      const wompiId = wompiResponse.id
-      const status = wompiResponse.status.toUpperCase()
-
-      // 3. Actualizar estado y wompiId
-      const updated = await this.prisma.transaction.update({
+      const status = wompiResponse.status?.toUpperCase() || 'DECLINED';
+      console.log('✅ Estado antes deactauizar:', status);
+      const updatedTransaction = await this.prisma.transaction.update({
         where: { id: transaction.id },
         data: {
           status,
-          wompiId,
+          wompiId: wompiResponse.id,
         },
         include: {
           product: true,
           customer: true,
           delivery: true,
         },
-      })
+      });
 
-      // 4. Si fue aprobado, descontar stock
       if (status === 'APPROVED') {
         await this.prisma.product.update({
           where: { id: transaction.productId },
           data: {
             stock: { decrement: 1 },
           },
-        })
+        });
       }
 
-      return updated
+      return updatedTransaction;
+
     } catch (error) {
-      console.error(error)
-      throw new InternalServerErrorException(
-        'Error al procesar el pago con Wompi'
-      )
+      if (error instanceof NotFoundException) throw error;
+
+      console.error('❌ Error al crear transacción:', error);
+      throw new InternalServerErrorException('Error al procesar el pago con Wompi');
     }
   }
 

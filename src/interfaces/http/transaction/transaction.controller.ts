@@ -8,9 +8,10 @@ import {
   NotFoundException,
   ParseUUIDPipe
 } from '@nestjs/common'
-import { TransactionService } from './transaction.service'
+import { TransactionService } from '@app/transaction/services/transaction.service'
 import { CreateTransactionDto } from './dto/create-transaction.dto'
 import { UpdateTransactionStatusDto } from './dto/update-transaction-status.dto'
+import { TokenizeRawCardDto } from './dto/tokenize-card-dto'
 
 @Controller('transactions')
 export class TransactionController {
@@ -21,6 +22,16 @@ export class TransactionController {
     return this.transactionService.create(dto)
   }
 
+  @Post('tokenize')
+  async tokenizeCard(@Body() dto: TokenizeRawCardDto) {
+    return { token: await this.transactionService.tokenizeCard(dto) };
+  }
+
+  @Post('pay')
+  async payTransaction(@Body() dto: CreateTransactionDto) {
+    return this.transactionService.create(dto);
+  }
+  
   @Get()
   async findAll() {
     return this.transactionService.findAll()
@@ -28,7 +39,7 @@ export class TransactionController {
 
   @Patch(':id/status')
   async updateStatus(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() body: Omit<UpdateTransactionStatusDto, 'id'>
   ) {
     return this.transactionService.updateStatus({ id, ...body })

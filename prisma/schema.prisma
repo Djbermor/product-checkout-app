@@ -21,7 +21,7 @@ model Customer {
   id           String        @id @default(uuid())
   name         String
   phone        String
-  email        String
+  email        String @unique
   transactions Transaction[]
 }
 
