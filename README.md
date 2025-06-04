@@ -1,54 +1,201 @@
-# React + TypeScript + Vite
+### 📄 `frontend/README.md`
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+```markdown
+# 🛍️ Product Checkout App - Frontend
 
-Currently, two official plugins are available:
+Este proyecto representa el frontend de una aplicación de ecommerce de una sola página (SPA) que permite realizar pagos mediante la plataforma Wompi. El flujo guía al usuario desde la selección de un producto, ingreso de datos de pago y envío, hasta la confirmación del estado de la transacción.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## ⚙️ Arquitectura
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Este frontend está desarrollado con:
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
+- **React 19 + TypeScript**
+- **Arquitectura Hexagonal**
+- **Redux Toolkit** para manejo de estado
+- **React Router v7** para navegación entre pasos
+- **TailwindCSS** para estilos
+- **Jest + React Testing Library** para pruebas
+
+Estructura hexagonal de carpetas:
+
+```
+
+frontend/
+├── src/
+│ ├── application/ # Casos de uso y lógica de negocio (ej: fetchProducts)
+│ ├── domain/ # Entidades puras del dominio (ej: Product)
+│ ├── infrastructure/ # Comunicación externa (ej: API de Wompi)
+│ │ └── api/
+│ ├── ui/ # Componentes y páginas de la interfaz
+│ │ ├── components/ # Componentes reutilizables (Input, Button, StepIndicator)
+│ │ └── pages/ # Páginas principales (ProductPage, CheckoutPage, etc.)
+│ ├── store/ # Redux Toolkit y slices (product, transaction)
+│ ├── routes/ # Definición de rutas y navegación
+│ ├── shared/ # Tipos globales y utilidades compartidas
+│ └── main.tsx # Punto de entrada principal
+├── public/ # Archivos estáticos
+├── index.html
+└── README.md
+
+````
+
+---
+
+## 🚀 Ejecutar localmente
+
+```bash
+git clone https://github.com/tu-usuario/product-checkout-app.git
+cd frontend
+npm install
+npm run dev
+````
+
+* Asegúrate de tener un archivo `.env` con:
+
+  ```env
+  VITE_WOMPI_PUBLIC_KEY=pub_stagtest_xxxxxx
+  ```
+
+---
+
+## 🔧 Ejecutar en producción
+
+### Opción recomendada: **Vercel**
+
+1. Subir el frontend a GitHub
+2. Crear proyecto en [https://vercel.com](https://vercel.com)
+3. Configurar:
+
+   * **Build Command:** `npm run build`
+   * **Output Directory:** `dist`
+   * **Variable de entorno:** `VITE_WOMPI_PUBLIC_KEY`
+
+### Alternativa: AWS S3
+
+```bash
+npm run build
+# Sube dist/ como sitio estático en tu bucket S3
+```
+
+---
+
+## 🌐 Variables de entorno
+
+| Variable                | Descripción                                                     |
+| ----------------------- | --------------------------------------------------------------- |
+| `VITE_WOMPI_PUBLIC_KEY` | Llave pública proporcionada por Wompi para sandbox o producción |
+
+---
+
+## 🔄 Estado persistente
+
+El estado de Redux (producto seleccionado, transacción, etc.) se sincroniza con `localStorage`, permitiendo persistencia entre refrescos de página.
+
+```ts
+store.subscribe(() => {
+  localStorage.setItem('store', JSON.stringify(store.getState()))
 })
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🔌 Endpoints backend importantes
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+* `POST /transaction`: Crear transacción con datos de tarjeta
+* `GET /transaction/:id`: Obtener estado de transacción
+
+---
+
+## ✅ Resultado de pruebas
+
+* Pruebas unitarias con cobertura:
+
+```bash
+npm run test -- --coverage
 ```
+
+* Screenshots, badges o estado: `✔️ Coverage > 80%`
+
+---
+
+## ✨ Autor
+
+Desarrollado por [Deivi Bertel](https://github.com/Djbermor) – FullStack Developer
+
+Perfecto, aquí tienes el **Paso 3: Guía para correr el proyecto localmente y en producción**, redactado para incluirlo directamente en el `README.md`:
+
+---
+
+### ✅ Paso 3: Cómo ejecutar el proyecto
+
+````markdown
+## ▶️ Cómo ejecutar el proyecto
+
+### 🔧 Requisitos
+
+- Node.js 18+
+- npm o pnpm
+- Acceso a las llaves de entorno (ej. `WOMPI_PUBLIC_KEY`)
+
+---
+
+### 💻 Ejecución en entorno local
+
+1. Clona el repositorio:
+
+```bash
+git clone https://github.com/usuario/product-checkout-app.git
+cd product-checkout-app/frontend
+````
+
+2. Instala las dependencias:
+
+```bash
+npm install
+```
+
+3. Crea un archivo `.env` con la llave pública de Wompi:
+
+```env
+VITE_WOMPI_PUBLIC_KEY=pub_stagtest_xxxxxxxxxxxxxxxxx
+```
+
+4. Inicia el servidor local:
+
+```bash
+npm run dev
+```
+
+Accede desde [http://localhost:5173](http://localhost:5173)
+
+---
+
+### 🚀 Build para producción
+
+```bash
+npm run build
+```
+
+Esto genera una carpeta `dist/` lista para desplegar en Vercel, Netlify, o AWS S3.
+
+---
+
+### 🌐 Despliegue en producción (ejemplo con Vercel)
+
+1. Sube tu repositorio a GitHub
+2. Conéctalo en [https://vercel.com/new](https://vercel.com/new)
+3. Configura:
+
+   * Framework: `Vite`
+   * Comando de build: `npm run build`
+   * Directorio de salida: `dist`
+4. Agrega tu variable de entorno:
+
+   * `VITE_WOMPI_PUBLIC_KEY=pub_stagtest_xxxxxxxxxxxx`
+5. ¡Deploy automático listo!
+
+```
+
+---
