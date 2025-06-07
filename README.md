@@ -1,4 +1,4 @@
-### 📄 `frontend/README.md`
+### 📄 `README.md`
 
 ```markdown
 # 🛍️ Product Checkout App - Frontend
@@ -22,7 +22,7 @@ Estructura hexagonal de carpetas:
 
 ```
 
-frontend/
+product-checkout-app/
 ├── src/
 │ ├── application/ # Casos de uso y lógica de negocio (ej: fetchProducts)
 │ ├── domain/ # Entidades puras del dominio (ej: Product)
@@ -47,7 +47,7 @@ frontend/
 
 ```bash
 git clone https://github.com/tu-usuario/product-checkout-app.git
-cd frontend
+cd product-checkout-app
 npm install
 npm run dev
 ````
@@ -147,7 +147,7 @@ Perfecto, aquí tienes el **Paso 3: Guía para correr el proyecto localmente y e
 
 ```bash
 git clone https://github.com/usuario/product-checkout-app.git
-cd product-checkout-app/frontend
+cd product-checkout-app
 ````
 
 2. Instala las dependencias:
