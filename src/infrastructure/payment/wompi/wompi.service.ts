@@ -1,16 +1,15 @@
 import { Injectable, HttpException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import axios from 'axios';
-import { sign } from 'crypto';
 
 @Injectable()
 export class WompiService {
   private readonly wompiBaseUrl = process.env.UAT_SANDBOX_URL
   private readonly privateKey = process.env.PRV_STAGTEST
-  private readonly publicteKey = process.env.PUB_STAGTEST
+  private readonly publicKey = process.env.PUB_STAGTEST
   private readonly integrityKey = process.env.STAGTEST_INTEGRITY;
 
   constructor() {
-    if (!this.wompiBaseUrl || !this.privateKey || !this.publicteKey) {
+    if (!this.wompiBaseUrl || !this.privateKey || !this.publicKey) {
       throw new Error('WOMPI configuration is incomplete. Check your .env file.');
     }
   }
@@ -28,7 +27,7 @@ export class WompiService {
         card,
         {
           headers: {
-            Authorization: `Bearer ${this.publicteKey}`,
+            Authorization: `Bearer ${this.publicKey}`,
           },
         }
       );
@@ -127,7 +126,7 @@ export class WompiService {
 
   async getTokenAccess(): Promise<string> {
     try {
-      const response = await axios.get(`${this.wompiBaseUrl}/merchants/${this.publicteKey}`);
+      const response = await axios.get(`${this.wompiBaseUrl}/merchants/${this.publicKey}`);
       const token = response.data?.data?.presigned_acceptance?.acceptance_token;
       if (!token) {
         console.error('No se recibió token de acceso desde Wompi:', response.data);
