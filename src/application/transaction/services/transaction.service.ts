@@ -94,7 +94,7 @@ export class TransactionService {
       });
 
       const status = wompiResponse.status?.toUpperCase() || 'DECLINED';
-      console.log('✅ Estado antes deactauizar:', status);
+      console.log('✅ Estado antes de actualizar:', status);
       const updatedTransaction = await this.prisma.transaction.update({
         where: { id: transaction.id },
         data: {
