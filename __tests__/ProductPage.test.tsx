@@ -26,5 +26,6 @@ describe('ProductPage', () => {
 
     expect(await screen.findByRole('heading', { name: /explora nuestros productos/i }))
       .toBeInTheDocument()
+    expect(await screen.findByText('Producto Test')).toBeInTheDocument()
   })
 })
