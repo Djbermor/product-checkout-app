@@ -1,3 +1,4 @@
+import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import ProductPage from '@pages/ProductPage'
 import CheckoutPage from '@pages/CheckoutPage'
@@ -18,4 +19,3 @@ function App() {
 }
 
 export default App
-import React from 'react'
