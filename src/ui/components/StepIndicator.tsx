@@ -13,7 +13,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ hideStatusStep = f
   const currentStep = progress.currentStep || 1
   const formData = progress.form || {}
   const status = progress.transaction?.status || null
-  const purchaseInitiated = progress.purchaseInitiated === true
+  const productSelected = progress.product && progress.quantity > 0
 
   const formCompleted =
     !!formData.cardNumber &&
@@ -44,7 +44,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({ hideStatusStep = f
     }
 
     if (index === 1) {
-      return purchaseInitiated && !isFinal
+      return currentStep >= 2 && productSelected && !isFinal
     }
 
     if (index === 2) {
